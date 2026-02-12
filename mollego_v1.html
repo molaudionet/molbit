@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mollego - Molecular Construction Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #game-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 20px;
+            height: 100vh;
+            padding: 20px;
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 3px solid #ff6b9d;
+        }
+
+        #header h1 {
+            font-size: 28px;
+            background: linear-gradient(45deg, #ff6b9d, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #stats {
+            display: flex;
+            gap: 30px;
+            font-size: 16px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #4ecdc4;
+            font-size: 20px;
+        }
+
+        /* LEFT PANEL - ATOM PALETTE */
+        #left-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 80px;
+            overflow-y: auto;
+            border: 2px solid rgba(255, 107, 157, 0.3);
+        }
+
+        #left-panel h2 {
+            color: #ff6b9d;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .atom-group {
+            margin-bottom: 20px;
+        }
+
+        .atom-group h3 {
+            color: #4ecdc4;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .atom-palette {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .atom-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #ff6b9d;
+            border-radius: 10px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .atom-button:hover {
+            background: rgba(255, 107, 157, 0.3);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 107, 157, 0.5);
+        }
+
+        .atom-button.selected {
+            background: rgba(255, 107, 157, 0.5);
+            border-color: #4ecdc4;
+            box-shadow: 0 0 30px rgba(78, 205, 196, 0.8);
+        }
+
+        .atom-symbol {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .atom-name {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .atom-valence {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(78, 205, 196, 0.8);
+            color: black;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 50%;
+        }
+
+        /* CENTER PANEL - CANVAS */
+        #center-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            margin-top: 80px;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #canvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        #level-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 2px solid #4ecdc4;
+        }
+
+        #level-info h3 {
+            color: #4ecdc4;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        #level-info p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        #stability-meter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ff6b9d;
+        }
+
+        #stability-meter h4 {
+            color: #ff6b9d;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #stability-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #stability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444, #ffaa00, #44ff44);
+            width: 0%;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        #stability-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* RIGHT PANEL - CONTROLS & INFO */
+        #right-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 80px;
+            overflow-y: auto;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+        }
+
+        #right-panel h2 {
+            color: #4ecdc4;
+            margin-bottom: 15px;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .control-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .control-section h3 {
+            color: #ff6b9d;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+        }
+
+        .button.secondary {
+            background: linear-gradient(135deg, #4ecdc4, #2c9f96);
+        }
+
+        .molecule-info {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .molecule-info p {
+            margin-bottom: 8px;
+        }
+
+        .molecule-info strong {
+            color: #4ecdc4;
+        }
+
+        #bond-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .bond-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #4ecdc4;
+            border-radius: 8px;
+            padding: 10px 5px;
+            color: white;
+            cursor: pointer;
+            text-align: center;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .bond-button:hover {
+            background: rgba(78, 205, 196, 0.3);
+        }
+
+        .bond-button.active {
+            background: rgba(78, 205, 196, 0.5);
+            border-color: #ff6b9d;
+        }
+
+        /* NOTIFICATIONS */
+        #notification {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 20px 30px;
+            font-size: 18px;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        #notification.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        #notification.success {
+            border-color: #44ff44;
+            color: #44ff44;
+        }
+
+        #notification.warning {
+            border-color: #ffaa00;
+            color: #ffaa00;
+        }
+
+        #notification.error {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* HELP MODAL */
+        #help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #help-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 3px solid #ff6b9d;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            color: #ff6b9d;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            color: #4ecdc4;
+            font-size: 20px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .modal-content p, .modal-content li {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .modal-content ul {
+            margin-left: 20px;
+        }
+
+        .close-button {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            border: none;
+            border-radius: 10px;
+            padding: 15px 40px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .close-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.5);
+        }
+
+        /* SCROLLBAR STYLING */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(78, 205, 196, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(78, 205, 196, 0.8);
+        }
+
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div id="header">
+        <h1>🧬 Mollego - Molecular Lego</h1>
+        <div id="stats">
+            <div class="stat">
+                <span>Level:</span>
+                <span class="stat-value" id="level-display">1</span>
+            </div>
+            <div class="stat">
+                <span>Score:</span>
+                <span class="stat-value" id="score-display">0</span>
+            </div>
+            <div class="stat">
+                <span>Molecules:</span>
+                <span class="stat-value" id="molecules-display">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN GAME CONTAINER -->
+    <div id="game-container">
+        <!-- LEFT PANEL - ATOM PALETTE -->
+        <div id="left-panel">
+            <h2>🔬 Atom Palette</h2>
+            
+            <div class="atom-group">
+                <h3>Essential (H, C, O, N)</h3>
+                <div class="atom-palette" id="essential-atoms"></div>
+            </div>
+            
+            <div class="atom-group">
+                <h3>Common Elements</h3>
+                <div class="atom-palette" id="common-atoms"></div>
+            </div>
+            
+            <button class="button" onclick="showHelp()">📖 How to Play</button>
+            <button class="button secondary" onclick="toggleSound()">🔊 Sound: <span id="sound-status">ON</span></button>
+        </div>
+
+        <!-- CENTER PANEL - CANVAS -->
+        <div id="center-panel">
+            <canvas id="canvas"></canvas>
+            
+            <div id="level-info">
+                <h3 id="level-name">Level 1: Carbon Wants Friends</h3>
+                <p id="level-objective">Build CH₄ (Methane)</p>
+            </div>
+            
+            <div id="stability-meter">
+                <h4>Stability</h4>
+                <div id="stability-bar">
+                    <div id="stability-fill"></div>
+                    <div id="stability-value">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL - CONTROLS & INFO -->
+        <div id="right-panel">
+            <h2>⚙️ Controls</h2>
+            
+            <div class="control-section">
+                <h3>Bond Type</h3>
+                <div id="bond-controls">
+                    <div class="bond-button active" onclick="setBondType(1)">Single<br>━</div>
+                    <div class="bond-button" onclick="setBondType(2)">Double<br>═</div>
+                    <div class="bond-button" onclick="setBondType(3)">Triple<br>≡</div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Actions</h3>
+                <button class="button" onclick="clearCanvas()">🗑️ Clear All</button>
+                <button class="button" onclick="undoLast()">↩️ Undo</button>
+                <button class="button secondary" onclick="checkMolecule()">✓ Check Molecule</button>
+                <button class="button secondary" onclick="submitMolecule()">🚀 Submit</button>
+            </div>
+            
+            <div class="control-section">
+                <h3>Current Molecule</h3>
+                <div class="molecule-info" id="molecule-info">
+                    <p><strong>Atoms:</strong> <span id="atom-count">0</span></p>
+                    <p><strong>Bonds:</strong> <span id="bond-count">0</span></p>
+                    <p><strong>Formula:</strong> <span id="formula">-</span></p>
+                    <p><strong>Valence:</strong> <span id="valence-status">✓ Satisfied</span></p>
+                    <p><strong>Stability:</strong> <span id="stability-score">0%</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION -->
+    <div id="notification"></div>
+
+    <!-- HELP MODAL -->
+    <div id="help-modal">
+        <div class="modal-content">
+            <h2>🧬 Welcome to Mollego!</h2>
+            
+            <h3>🎯 Goal</h3>
+            <p>Build stable molecules by connecting atoms like Lego blocks. Each level challenges you to create specific molecules or achieve high stability scores.</p>
+            
+            <h3>🔧 How to Play</h3>
+            <ul>
+                <li><strong>Select an Atom:</strong> Click on an element from the left palette</li>
+                <li><strong>Place Atom:</strong> Click on the canvas to place it</li>
+                <li><strong>Create Bonds:</strong> Click on two atoms to bond them together</li>
+                <li><strong>Bond Type:</strong> Choose Single, Double, or Triple bonds</li>
+                <li><strong>Check Stability:</strong> Watch the stability meter rise as you build</li>
+            </ul>
+            
+            <h3>⚗️ Chemistry Rules</h3>
+            <ul>
+                <li><strong>Valence:</strong> Each atom has a maximum number of bonds (H=1, C=4, O=2, N=3)</li>
+                <li><strong>Stability:</strong> Molecules are stable when all atoms satisfy their valence</li>
+                <li><strong>Bonding:</strong> Double/triple bonds count as 2/3 bonds respectively</li>
+                <li><strong>Sound:</strong> Stable molecules make harmonic sounds! 🎵</li>
+            </ul>
+            
+            <h3>🏆 Scoring</h3>
+            <ul>
+                <li>+50 points per stable molecule</li>
+                <li>+10 points per atom used</li>
+                <li>Bonus for completing level objectives</li>
+            </ul>
+            
+            <button class="close-button" onclick="hideHelp()">Start Building! 🚀</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== GAME STATE =====
+        const gameState = {
+            level: 1,
+            score: 0,
+            moleculesBuilt: 0,
+            selectedAtom: null,
+            bondType: 1,
+            atoms: [],
+            bonds: [],
+            soundEnabled: true,
+            audioContext: null
+        };
+
+        // ===== ATOM DATABASE =====
+        const ATOMS = {
+            H: { symbol: 'H', name: 'Hydrogen', valence: 1, color: '#ffffff', freq: 261.63 },
+            C: { symbol: 'C', name: 'Carbon', valence: 4, color: '#909090', freq: 293.66 },
+            N: { symbol: 'N', name: 'Nitrogen', valence: 3, color: '#3050f8', freq: 329.63 },
+            O: { symbol: 'O', name: 'Oxygen', valence: 2, color: '#ff0d0d', freq: 349.23 },
+            P: { symbol: 'P', name: 'Phosphorus', valence: 5, color: '#ff8000', freq: 392.00 },
+            S: { symbol: 'S', name: 'Sulfur', valence: 6, color: '#ffff30', freq: 440.00 },
+            Cl: { symbol: 'Cl', name: 'Chlorine', valence: 1, color: '#1ff01f', freq: 493.88 },
+            Na: { symbol: 'Na', name: 'Sodium', valence: 1, color: '#ab5cf2', freq: 523.25 },
+            K: { symbol: 'K', name: 'Potassium', valence: 1, color: '#8f40d4', freq: 587.33 },
+            Ca: { symbol: 'Ca', name: 'Calcium', valence: 2, color: '#3dff00', freq: 659.25 }
+        };
+
+        // ===== LEVELS =====
+        const LEVELS = [
+            {
+                name: 'Level 1: Carbon Wants Friends',
+                objective: 'Build CH₄ (Methane)',
+                target: 'CH4',
+                requiredStability: 95,
+                availableAtoms: ['H', 'C']
+            },
+            {
+                name: 'Level 2: Oxygen Needs Balance',
+                objective: 'Build H₂O (Water)',
+                target: 'H2O',
+                requiredStability: 95,
+                availableAtoms: ['H', 'O']
+            },
+            {
+                name: 'Level 3: Triple Bond Challenge',
+                objective: 'Build N₂ (Nitrogen Gas)',
+                target: 'N2',
+                requiredStability: 98,
+                availableAtoms: ['N']
+            },
+            {
+                name: 'Level 4: Salt Puzzle',
+                objective: 'Build NaCl (Salt)',
+                target: 'NaCl',
+                requiredStability: 90,
+                availableAtoms: ['Na', 'Cl']
+            },
+            {
+                name: 'Level 5: Free Build',
+                objective: 'Build ANY stable molecule (Stability > 85%)',
+                target: null,
+                requiredStability: 85,
+                availableAtoms: ['H', 'C', 'N', 'O', 'P', 'S', 'Cl']
+            }
+        ];
+
+        // ===== CANVAS SETUP =====
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            draw();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // ===== INITIALIZATION =====
+        function init() {
+            initAudio();
+            loadLevel(1);
+            setupAtomPalette();
+            draw();
+        }
+
+        function initAudio() {
+            gameState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function setupAtomPalette() {
+            const essentialAtoms = ['H', 'C', 'N', 'O'];
+            const commonAtoms = ['P', 'S', 'Cl', 'Na', 'K', 'Ca'];
+            
+            const essentialDiv = document.getElementById('essential-atoms');
+            const commonDiv = document.getElementById('common-atoms');
+            
+            essentialAtoms.forEach(symbol => {
+                if (ATOMS[symbol]) {
+                    essentialDiv.appendChild(createAtomButton(symbol));
+                }
+            });
+            
+            commonAtoms.forEach(symbol => {
+                if (ATOMS[symbol]) {
+                    commonDiv.appendChild(createAtomButton(symbol));
+                }
+            });
+        }
+
+        function createAtomButton(symbol) {
+            const atom = ATOMS[symbol];
+            const button = document.createElement('div');
+            button.className = 'atom-button';
+            button.innerHTML = `
+                <div class="atom-valence">${atom.valence}</div>
+                <div class="atom-symbol" style="color: ${atom.color}">${atom.symbol}</div>
+                <div class="atom-name">${atom.name}</div>
+            `;
+            button.onclick = () => selectAtom(symbol);
+            button.dataset.atom = symbol;
+            return button;
+        }
+
+        function selectAtom(symbol) {
+            gameState.selectedAtom = symbol;
+            
+            // Update UI
+            document.querySelectorAll('.atom-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`[data-atom="${symbol}"]`).classList.add('selected');
+            
+            showNotification(`Selected: ${ATOMS[symbol].name}`, 'success');
+        }
+
+        function setBondType(type) {
+            gameState.bondType = type;
+            
+            document.querySelectorAll('.bond-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const types = ['Single', 'Double', 'Triple'];
+            showNotification(`Bond Type: ${types[type-1]}`, 'success');
+        }
+
+        // ===== LEVEL MANAGEMENT =====
+        function loadLevel(levelNum) {
+            if (levelNum > LEVELS.length) {
+                showNotification('🎉 Congratulations! You completed all levels!', 'success');
+                return;
+            }
+            
+            const level = LEVELS[levelNum - 1];
+            gameState.level = levelNum;
+            gameState.atoms = [];
+            gameState.bonds = [];
+            
+            document.getElementById('level-name').textContent = level.name;
+            document.getElementById('level-objective').textContent = level.objective;
+            document.getElementById('level-display').textContent = levelNum;
+            
+            draw();
+            showNotification(`${level.name}`, 'success');
+        }
+
+        // ===== CANVAS INTERACTION =====
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const clickedAtom = findAtomAt(x, y);
+            
+            if (clickedAtom && gameState.selectedAtom === null) {
+                // Try to bond
+                if (gameState.tempAtom) {
+                    createBond(gameState.tempAtom, clickedAtom);
+                    gameState.tempAtom = null;
+                } else {
+                    gameState.tempAtom = clickedAtom;
+                    showNotification('Click another atom to bond', 'warning');
+                }
+            } else if (gameState.selectedAtom) {
+                // Place new atom
+                placeAtom(x, y);
+            }
+        });
+
+        function findAtomAt(x, y) {
+            const radius = 30;
+            return gameState.atoms.find(atom => {
+                const dist = Math.sqrt((atom.x - x) ** 2 + (atom.y - y) ** 2);
+                return dist < radius;
+            });
+        }
+
+        function placeAtom(x, y) {
+            const atomData = ATOMS[gameState.selectedAtom];
+            
+            const newAtom = {
+                id: Date.now(),
+                symbol: gameState.selectedAtom,
+                x: x,
+                y: y,
+                valence: atomData.valence,
+                bonds: [],
+                color: atomData.color,
+                freq: atomData.freq
+            };
+            
+            gameState.atoms.push(newAtom);
+            gameState.selectedAtom = null;
+            
+            // Deselect button
+            document.querySelectorAll('.atom-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            playSound(atomData.freq, 0.1);
+            draw();
+            updateMoleculeInfo();
+        }
+
+        function createBond(atom1, atom2) {
+            if (atom1.id === atom2.id) return;
+            
+            // Check if bond already exists
+            const exists = gameState.bonds.find(b => 
+                (b.atom1 === atom1.id && b.atom2 === atom2.id) ||
+                (b.atom1 === atom2.id && b.atom2 === atom1.id)
+            );
+            
+            if (exists) {
+                showNotification('Bond already exists!', 'warning');
+                return;
+            }
+            
+            // Check valence
+            const atom1Bonds = countAtomBonds(atom1.id);
+            const atom2Bonds = countAtomBonds(atom2.id);
+            
+            if (atom1Bonds + gameState.bondType > atom1.valence) {
+                showNotification(`${atom1.symbol} valence exceeded!`, 'error');
+                return;
+            }
+            
+            if (atom2Bonds + gameState.bondType > atom2.valence) {
+                showNotification(`${atom2.symbol} valence exceeded!`, 'error');
+                return;
+            }
+            
+            gameState.bonds.push({
+                atom1: atom1.id,
+                atom2: atom2.id,
+                type: gameState.bondType
+            });
+            
+            // Play chord
+            playChord([atom1.freq, atom2.freq], 0.2);
+            
+            draw();
+            updateMoleculeInfo();
+            calculateStability();
+        }
+
+        function countAtomBonds(atomId) {
+            let total = 0;
+            gameState.bonds.forEach(bond => {
+                if (bond.atom1 === atomId || bond.atom2 === atomId) {
+                    total += bond.type;
+                }
+            });
+            return total;
+        }
+
+        // ===== DRAWING =====
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw bonds
+            gameState.bonds.forEach(bond => {
+                const atom1 = gameState.atoms.find(a => a.id === bond.atom1);
+                const atom2 = gameState.atoms.find(a => a.id === bond.atom2);
+                
+                if (atom1 && atom2) {
+                    drawBond(atom1, atom2, bond.type);
+                }
+            });
+            
+            // Draw atoms
+            gameState.atoms.forEach(atom => {
+                drawAtom(atom);
+            });
+        }
+
+        function drawAtom(atom) {
+            const radius = 30;
+            
+            // Glow effect
+            const gradient = ctx.createRadialGradient(atom.x, atom.y, 0, atom.x, atom.y, radius);
+            gradient.addColorStop(0, atom.color);
+            gradient.addColorStop(0.6, atom.color + '80');
+            gradient.addColorStop(1, 'transparent');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(atom.x, atom.y, radius * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Atom circle
+            ctx.fillStyle = atom.color;
+            ctx.beginPath();
+            ctx.arc(atom.x, atom.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Border
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Symbol
+            ctx.fillStyle = atom.symbol === 'C' ? 'white' : 'black';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(atom.symbol, atom.x, atom.y);
+        }
+
+        function drawBond(atom1, atom2, type) {
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            
+            if (type === 1) {
+                // Single bond
+                ctx.beginPath();
+                ctx.moveTo(atom1.x, atom1.y);
+                ctx.lineTo(atom2.x, atom2.y);
+                ctx.stroke();
+            } else if (type === 2) {
+                // Double bond
+                const dx = atom2.x - atom1.x;
+                const dy = atom2.y - atom1.y;
+                const len = Math.sqrt(dx * dx + dy * dy);
+                const nx = -dy / len * 4;
+                const ny = dx / len * 4;
+                
+                ctx.beginPath();
+                ctx.moveTo(atom1.x + nx, atom1.y + ny);
+                ctx.lineTo(atom2.x + nx, atom2.y + ny);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(atom1.x - nx, atom1.y - ny);
+                ctx.lineTo(atom2.x - nx, atom2.y - ny);
+                ctx.stroke();
+            } else if (type === 3) {
+                // Triple bond
+                const dx = atom2.x - atom1.x;
+                const dy = atom2.y - atom1.y;
+                const len = Math.sqrt(dx * dx + dy * dy);
+                const nx = -dy / len * 5;
+                const ny = dx / len * 5;
+                
+                // Center line
+                ctx.beginPath();
+                ctx.moveTo(atom1.x, atom1.y);
+                ctx.lineTo(atom2.x, atom2.y);
+                ctx.stroke();
+                
+                // Top line
+                ctx.beginPath();
+                ctx.moveTo(atom1.x + nx, atom1.y + ny);
+                ctx.lineTo(atom2.x + nx, atom2.y + ny);
+                ctx.stroke();
+                
+                // Bottom line
+                ctx.beginPath();
+                ctx.moveTo(atom1.x - nx, atom1.y - ny);
+                ctx.lineTo(atom2.x - nx, atom2.y - ny);
+                ctx.stroke();
+            }
+        }
+
+        // ===== MOLECULE ANALYSIS =====
+        function updateMoleculeInfo() {
+            const atomCount = gameState.atoms.length;
+            const bondCount = gameState.bonds.length;
+            const formula = calculateFormula();
+            const valenceCheck = checkValence();
+            
+            document.getElementById('atom-count').textContent = atomCount;
+            document.getElementById('bond-count').textContent = bondCount;
+            document.getElementById('formula').textContent = formula || '-';
+            document.getElementById('valence-status').textContent = valenceCheck.satisfied ? '✓ Satisfied' : '✗ Unsatisfied';
+            document.getElementById('valence-status').style.color = valenceCheck.satisfied ? '#44ff44' : '#ff4444';
+        }
+
+        function calculateFormula() {
+            if (gameState.atoms.length === 0) return '';
+            
+            const counts = {};
+            gameState.atoms.forEach(atom => {
+                counts[atom.symbol] = (counts[atom.symbol] || 0) + 1;
+            });
+            
+            let formula = '';
+            // C, H, then alphabetical
+            const order = ['C', 'H'];
+            Object.keys(counts).sort().forEach(sym => {
+                if (!order.includes(sym)) order.push(sym);
+            });
+            
+            order.forEach(symbol => {
+                if (counts[symbol]) {
+                    formula += symbol;
+                    if (counts[symbol] > 1) {
+                        formula += counts[symbol];
+                    }
+                }
+            });
+            
+            return formula;
+        }
+
+        function checkValence() {
+            let allSatisfied = true;
+            
+            gameState.atoms.forEach(atom => {
+                const bonds = countAtomBonds(atom.id);
+                if (bonds !== atom.valence) {
+                    allSatisfied = false;
+                }
+            });
+            
+            return {
+                satisfied: allSatisfied && gameState.atoms.length > 0
+            };
+        }
+
+        function calculateStability() {
+            if (gameState.atoms.length === 0) {
+                updateStabilityMeter(0);
+                return 0;
+            }
+            
+            let stability = 0;
+            let maxPossible = 0;
+            
+            // Check each atom's valence satisfaction
+            gameState.atoms.forEach(atom => {
+                const bonds = countAtomBonds(atom.id);
+                const completion = Math.min(bonds / atom.valence, 1);
+                stability += completion * 100;
+                maxPossible += 100;
+                
+                // Penalty for overbonding
+                if (bonds > atom.valence) {
+                    stability -= (bonds - atom.valence) * 20;
+                }
+            });
+            
+            // Bonus for complete molecule
+            if (checkValence().satisfied) {
+                stability += 20;
+                maxPossible += 20;
+            }
+            
+            const percent = Math.max(0, Math.min(100, (stability / maxPossible) * 100));
+            updateStabilityMeter(percent);
+            
+            return percent;
+        }
+
+        function updateStabilityMeter(percent) {
+            const fill = document.getElementById('stability-fill');
+            const value = document.getElementById('stability-value');
+            const score = document.getElementById('stability-score');
+            
+            fill.style.width = percent + '%';
+            value.textContent = Math.round(percent) + '%';
+            score.textContent = Math.round(percent) + '%';
+            
+            // Color coding
+            if (percent >= 85) {
+                fill.style.background = 'linear-gradient(90deg, #44ff44, #00ff00)';
+            } else if (percent >= 60) {
+                fill.style.background = 'linear-gradient(90deg, #ffaa00, #ffdd00)';
+            } else {
+                fill.style.background = 'linear-gradient(90deg, #ff4444, #ff8800)';
+            }
+        }
+
+        // ===== ACTIONS =====
+        function clearCanvas() {
+            if (confirm('Clear all atoms and bonds?')) {
+                gameState.atoms = [];
+                gameState.bonds = [];
+                gameState.selectedAtom = null;
+                gameState.tempAtom = null;
+                draw();
+                updateMoleculeInfo();
+                updateStabilityMeter(0);
+            }
+        }
+
+        function undoLast() {
+            if (gameState.bonds.length > 0) {
+                gameState.bonds.pop();
+            } else if (gameState.atoms.length > 0) {
+                gameState.atoms.pop();
+            }
+            draw();
+            updateMoleculeInfo();
+            calculateStability();
+        }
+
+        function checkMolecule() {
+            const stability = calculateStability();
+            const formula = calculateFormula();
+            const valence = checkValence();
+            
+            let message = `Formula: ${formula}\n`;
+            message += `Stability: ${Math.round(stability)}%\n`;
+            message += `Valence: ${valence.satisfied ? 'Satisfied ✓' : 'Not satisfied ✗'}`;
+            
+            if (stability >= 85) {
+                playHarmony();
+            }
+            
+            alert(message);
+        }
+
+        function submitMolecule() {
+            const level = LEVELS[gameState.level - 1];
+            const stability = calculateStability();
+            const formula = calculateFormula();
+            
+            // Check if level complete
+            if (level.target && formula !== level.target) {
+                showNotification(`Need ${level.target}, got ${formula}`, 'error');
+                return;
+            }
+            
+            if (stability < level.requiredStability) {
+                showNotification(`Stability too low! Need ${level.requiredStability}%`, 'error');
+                return;
+            }
+            
+            // Success!
+            const points = 50 + (gameState.atoms.length * 10);
+            gameState.score += points;
+            gameState.moleculesBuilt++;
+            
+            document.getElementById('score-display').textContent = gameState.score;
+            document.getElementById('molecules-display').textContent = gameState.moleculesBuilt;
+            
+            showNotification(`✨ Level Complete! +${points} points`, 'success');
+            playVictory();
+            
+            setTimeout(() => {
+                loadLevel(gameState.level + 1);
+            }, 2000);
+        }
+
+        // ===== AUDIO =====
+        function playSound(freq, duration) {
+            if (!gameState.soundEnabled || !gameState.audioContext) return;
+            
+            const oscillator = gameState.audioContext.createOscillator();
+            const gainNode = gameState.audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(gameState.audioContext.destination);
+            
+            oscillator.frequency.value = freq;
+            gainNode.gain.value = 0.1;
+            
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.01, gameState.audioContext.currentTime + duration);
+            oscillator.stop(gameState.audioContext.currentTime + duration);
+        }
+
+        function playChord(frequencies, duration) {
+            frequencies.forEach(freq => playSound(freq, duration));
+        }
+
+        function playHarmony() {
+            const freqs = [261.63, 329.63, 392.00]; // C, E, G (C major chord)
+            freqs.forEach((freq, i) => {
+                setTimeout(() => playSound(freq, 0.5), i * 100);
+            });
+        }
+
+        function playVictory() {
+            const melody = [261.63, 293.66, 329.63, 349.23, 392.00];
+            melody.forEach((freq, i) => {
+                setTimeout(() => playSound(freq, 0.2), i * 150);
+            });
+        }
+
+        function toggleSound() {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            document.getElementById('sound-status').textContent = gameState.soundEnabled ? 'ON' : 'OFF';
+        }
+
+        // ===== UI HELPERS =====
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'show ' + type;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        function showHelp() {
+            document.getElementById('help-modal').classList.add('show');
+        }
+
+        function hideHelp() {
+            document.getElementById('help-modal').classList.remove('show');
+        }
+
+        // ===== START GAME =====
+        window.addEventListener('load', () => {
+            init();
+            showHelp(); // Show help on first load
+        });
+
+    </script>
+</body>
+</html>
