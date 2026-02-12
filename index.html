@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mollego Pro - AI-Powered Molecular Construction</title>
+    <title>MolBit Pro - AI-Powered Molecular Construction</title>
     <style>
         * {
             margin: 0;
@@ -621,7 +621,7 @@
     <!-- HEADER -->
     <div id="header">
         <div>
-            <h1>🧬 Mollego Pro</h1>
+            <h1>🧬 MolBit Pro</h1>
             <div class="header-subtitle">AI-Powered Molecular Construction</div>
         </div>
         <div id="stats">
@@ -714,7 +714,7 @@
 
             <!-- AI ASSISTANT -->
             <div class="control-section" id="ai-assistant">
-                <h3>🤖 AI Chemistry Assistant</h3>
+                <h3>AI Assistant</h3>
                 <div id="chat-messages">
                     <div class="message assistant">
                         <strong>MolBot:</strong>
@@ -723,7 +723,7 @@
                 </div>
                 <div id="chat-input-container">
                     <input type="text" id="chat-input" placeholder="Ask about chemistry..." onkeypress="handleChatKeypress(event)">
-                    <button class="icon-button" onclick="sendMessage()" title="Send">📤</button>
+                    <button class="icon-button" onclick="sendMessage()" title="Send"></button>
                     <button class="icon-button" onclick="startVoiceInput()" id="voice-btn" title="Voice Input">🎤</button>
                 </div>
             </div>
@@ -736,9 +736,9 @@
     <!-- HELP MODAL -->
     <div id="help-modal">
         <div class="modal-content">
-            <h2>🧬 Welcome to Mollego Pro!</h2>
+            <h2>🧬 Welcome to MolBit Pro!</h2>
             
-            <h3>🎯 Goal</h3>
+            <h3>Goal</h3>
             <p>Build stable molecules by connecting atoms like Lego blocks. Master chemical bonding through interactive gameplay and AI-assisted learning!</p>
             
             <h3>🔧 How to Play</h3>
@@ -751,7 +751,7 @@
                 <li><strong>Ask AI:</strong> Type questions to the AI assistant for chemistry help!</li>
             </ul>
             
-            <h3>⚗️ Chemistry Rules</h3>
+            <h3>Chemistry Rules</h3>
             <ul>
                 <li><strong>Valence Rules:</strong>
                     <ul>
@@ -1531,12 +1531,12 @@
             analysis += `Stability: ${Math.round(stability)}%\n\n`;
             
             if (stability >= 90) {
-                analysis += '🎉 Excellent! This is a very stable molecule.';
+                analysis += 'Excellent! This is a very stable molecule.';
                 playHarmony();
             } else if (stability >= 70) {
-                analysis += '✅ Good structure, but could be more stable.';
+                analysis += 'Good structure, but could be more stable.';
             } else {
-                analysis += '⚠️ This molecule is unstable. Check valence rules.';
+                analysis += 'This molecule is unstable. Check valence rules.';
             }
             
             alert(analysis);
@@ -1595,7 +1595,7 @@
 
         function showExamples() {
             const examples = `
-🧪 Common Molecules:
+Common Molecules:
 
 1. CH₄ (Methane)
    - 1 Carbon + 4 Hydrogens
@@ -1785,9 +1785,9 @@ Try building these!
             init();
             
             // Show help on first visit
-            if (!localStorage.getItem('mollego-visited')) {
+            if (!localStorage.getItem('molbit-visited')) {
                 setTimeout(() => showHelp(), 500);
-                localStorage.setItem('mollego-visited', 'true');
+                localStorage.setItem('molbit-visited', 'true');
             }
         });
 
