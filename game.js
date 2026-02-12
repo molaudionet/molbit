@@ -108,9 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initCanvas() {
     const canvas = document.getElementById('canvas');
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
     
     // Direct click handler on canvas element
     canvas.addEventListener('click', (event) => {
@@ -120,6 +117,7 @@ function initCanvas() {
         const y = event.clientY - rect.top;
         
         console.log('Canvas click at:', x, y);
+        console.log('Selected element:', gameState.selectedElement);
         
         // Check if we clicked on an atom
         let clickedOnAtom = false;
@@ -135,6 +133,7 @@ function initCanvas() {
                 const atomId = parseInt(atomEl.dataset.atomId);
                 const atom = gameState.atoms.find(a => a.id === atomId);
                 if (atom) {
+                    console.log('Clicked on atom:', atom.element);
                     handleAtomClick(atom);
                 }
             }
@@ -142,15 +141,16 @@ function initCanvas() {
         
         // If didn't click atom, try to place new atom
         if (!clickedOnAtom && gameState.selectedElement) {
+            console.log('Placing atom at:', x, y);
             placeAtom(x, y);
+        } else if (!clickedOnAtom && !gameState.selectedElement) {
+            console.log('No element selected!');
+            showNotification('Please select an element first', 'info');
         }
     });
     
     // Resize handler
     window.addEventListener('resize', () => {
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
         redraw();
     });
 }
@@ -323,7 +323,12 @@ function createAtomElement(atom) {
         atomEl.classList.add('ionic');
     }
     
+    console.log('Creating atom element:', atom.element, 'at', atom.x, atom.y);
+    console.log('Atom element:', atomEl);
+    
     canvas.appendChild(atomEl);
+    
+    console.log('Atom appended to canvas. Canvas children:', canvas.children.length);
 }
 
 function handleAtomClick(atom) {

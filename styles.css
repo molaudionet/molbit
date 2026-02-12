@@ -218,6 +218,8 @@ body {
     cursor: crosshair;
     border: 3px solid rgba(78, 205, 196, 0.3);
     box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.3);
+    position: relative; /* CRITICAL for absolute positioned atoms */
+    overflow: hidden;
 }
 
 #canvas:hover {
