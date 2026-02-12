@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MolBit - Standalone Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #container {
+            width: 90%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 200px 1fr 250px;
+            gap: 20px;
+            height: 80vh;
+        }
+        
+        .panel {
+            background: rgba(36, 36, 62, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid rgba(255, 107, 157, 0.2);
+        }
+        
+        #canvas {
+            background: rgba(42, 74, 106, 0.5);
+            border: 3px solid #4ecdc4;
+            border-radius: 15px;
+            position: relative !important;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+        
+        .element-btn {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .element-btn:hover {
+            background: rgba(255, 107, 157, 0.3);
+        }
+        
+        .element-btn.selected {
+            background: #ff6b9d;
+            border-color: #ff6b9d;
+        }
+        
+        .atom {
+            position: absolute !important;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        #info {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        h2 {
+            color: #4ecdc4;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Left Panel -->
+        <div class="panel">
+            <h2>Elements</h2>
+            <button class="element-btn" data-element="H" data-color="#ffffff">H - Hydrogen</button>
+            <button class="element-btn" data-element="C" data-color="#909090">C - Carbon</button>
+            <button class="element-btn" data-element="N" data-color="#3050f8">N - Nitrogen</button>
+            <button class="element-btn" data-element="O" data-color="#ff0d0d">O - Oxygen</button>
+        </div>
+        
+        <!-- Center Panel -->
+        <div class="panel">
+            <h2>Build Area - Click to Place Atoms</h2>
+            <div id="canvas"></div>
+        </div>
+        
+        <!-- Right Panel -->
+        <div class="panel">
+            <h2>Info</h2>
+            <div id="info">
+                <div>Selected: <span id="selected">None</span></div>
+                <div>Atoms: <span id="count">0</span></div>
+                <div>Formula: <span id="formula">-</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        console.log('=== MOLBIT STANDALONE TEST ===');
+        
+        let selectedElement = null;
+        let selectedColor = null;
+        let atoms = [];
+        let atomId = 0;
+        
+        // Element buttons
+        const elementBtns = document.querySelectorAll('.element-btn');
+        elementBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                console.log('Element clicked:', btn.dataset.element);
+                
+                // Deselect all
+                elementBtns.forEach(b => b.classList.remove('selected'));
+                
+                // Select this one
+                btn.classList.add('selected');
+                selectedElement = btn.dataset.element;
+                selectedColor = btn.dataset.color;
+                
+                document.getElementById('selected').textContent = selectedElement;
+                console.log('Selected element:', selectedElement);
+            });
+        });
+        
+        // Canvas click
+        const canvas = document.getElementById('canvas');
+        console.log('Canvas element:', canvas);
+        console.log('Canvas position:', window.getComputedStyle(canvas).position);
+        
+        canvas.addEventListener('click', (e) => {
+            console.log('=== CANVAS CLICKED ===');
+            
+            if (!selectedElement) {
+                alert('Please select an element first!');
+                return;
+            }
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            console.log('Click position:', x, y);
+            console.log('Canvas rect:', rect);
+            
+            // Create atom
+            const atom = document.createElement('div');
+            atom.className = 'atom';
+            atom.style.left = (x - 20) + 'px';
+            atom.style.top = (y - 20) + 'px';
+            atom.style.backgroundColor = selectedColor;
+            atom.textContent = selectedElement;
+            atom.id = 'atom-' + atomId;
+            
+            console.log('Atom created:', atom);
+            console.log('Atom left:', atom.style.left);
+            console.log('Atom top:', atom.style.top);
+            
+            // Append to canvas
+            canvas.appendChild(atom);
+            
+            console.log('Atom appended to canvas');
+            console.log('Canvas children:', canvas.children.length);
+            
+            // Store data
+            atoms.push({
+                id: atomId++,
+                element: selectedElement,
+                x: x,
+                y: y
+            });
+            
+            // Update info
+            document.getElementById('count').textContent = atoms.length;
+            
+            // Calculate formula
+            const formula = {};
+            atoms.forEach(a => {
+                formula[a.element] = (formula[a.element] || 0) + 1;
+            });
+            
+            let formulaStr = '';
+            Object.keys(formula).sort().forEach(el => {
+                formulaStr += el;
+                if (formula[el] > 1) formulaStr += formula[el];
+            });
+            
+            document.getElementById('formula').textContent = formulaStr || '-';
+            
+            console.log('=== ATOM PLACED ===');
+        });
+        
+        console.log('=== SETUP COMPLETE ===');
+        console.log('Click an element button, then click the canvas!');
+        
+        // Test on load
+        setTimeout(() => {
+            console.log('Testing canvas position after 1 second...');
+            console.log('Canvas computed position:', window.getComputedStyle(canvas).position);
+            console.log('Canvas offsetParent:', canvas.offsetParent);
+        }, 1000);
+    </script>
+</body>
+</html>

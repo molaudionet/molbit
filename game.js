@@ -97,13 +97,37 @@ const gameState = {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('========================================');
+    console.log('MOLBIT STARTING UP');
+    console.log('========================================');
+    
+    alert('MolBit JavaScript loaded! Check console (F12) for debug info.');
+    
+    console.log('Step 1: Init canvas...');
     initCanvas();
+    
+    console.log('Step 2: Init level selector...');
     initLevelSelector();
+    
+    console.log('Step 3: Init atom palette...');
     initAtomPalette();
+    
+    console.log('Step 4: Init bond selector...');
     initBondSelector();
+    
+    console.log('Step 5: Init controls...');
     initControls();
+    
+    console.log('Step 6: Init help...');
     initHelp();
+    
+    console.log('Step 7: Load level 0...');
     loadLevel(0);
+    
+    console.log('========================================');
+    console.log('MOLBIT READY!');
+    console.log('Click an element, then click canvas to place atoms.');
+    console.log('========================================');
 });
 
 function initCanvas() {
@@ -286,6 +310,11 @@ function placeAtom(x, y) {
     const element = gameState.selectedElement;
     const data = ELEMENTS[element];
     
+    console.log('=== PLACING ATOM ===');
+    console.log('Element:', element);
+    console.log('Position:', x, y);
+    console.log('Data:', data);
+    
     const atom = {
         id: gameState.nextAtomId++,
         element: element,
@@ -298,6 +327,12 @@ function placeAtom(x, y) {
     };
     
     gameState.atoms.push(atom);
+    console.log('Atom added to array. Total atoms:', gameState.atoms.length);
+    
+    // Alert on first atom
+    if (gameState.atoms.length === 1) {
+        alert('First atom created! You should see it on canvas. If not, check browser console.');
+    }
     
     // Create visual element
     createAtomElement(atom);
@@ -306,6 +341,7 @@ function placeAtom(x, y) {
     createParticles(x, y, data.color);
     
     updateInfo();
+    console.log('=== ATOM PLACEMENT COMPLETE ===');
 }
 
 function createAtomElement(atom) {
