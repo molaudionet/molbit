@@ -112,7 +112,39 @@ function initCanvas() {
     canvas.width = rect.width;
     canvas.height = rect.height;
     
-    canvas.addEventListener('click', handleCanvasClick);
+    // Direct click handler on canvas element
+    canvas.addEventListener('click', (event) => {
+        // Only process if we clicked the canvas itself or inside it
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        console.log('Canvas click at:', x, y);
+        
+        // Check if we clicked on an atom
+        let clickedOnAtom = false;
+        const atomElements = canvas.querySelectorAll('.atom');
+        atomElements.forEach(atomEl => {
+            const atomRect = atomEl.getBoundingClientRect();
+            const atomX = event.clientX;
+            const atomY = event.clientY;
+            
+            if (atomX >= atomRect.left && atomX <= atomRect.right &&
+                atomY >= atomRect.top && atomY <= atomRect.bottom) {
+                clickedOnAtom = true;
+                const atomId = parseInt(atomEl.dataset.atomId);
+                const atom = gameState.atoms.find(a => a.id === atomId);
+                if (atom) {
+                    handleAtomClick(atom);
+                }
+            }
+        });
+        
+        // If didn't click atom, try to place new atom
+        if (!clickedOnAtom && gameState.selectedElement) {
+            placeAtom(x, y);
+        }
+    });
     
     // Resize handler
     window.addEventListener('resize', () => {
@@ -250,28 +282,6 @@ function selectBondType(type) {
 // CANVAS INTERACTION
 // ========================================
 
-function handleCanvasClick(event) {
-    const canvas = document.getElementById('canvas');
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    
-    // Ignore clicks on atom elements themselves
-    if (event.target.classList.contains('atom') || 
-        event.target.closest('.atom')) {
-        return;
-    }
-    
-    // Check if clicked near existing atom
-    const clickedAtom = getAtomAtPosition(x, y);
-    
-    if (clickedAtom) {
-        handleAtomClick(clickedAtom);
-    } else if (gameState.selectedElement) {
-        placeAtom(x, y);
-    }
-}
-
 function placeAtom(x, y) {
     const element = gameState.selectedElement;
     const data = ELEMENTS[element];
@@ -303,8 +313,8 @@ function createAtomElement(atom) {
     const atomEl = document.createElement('div');
     atomEl.className = 'atom';
     atomEl.dataset.atomId = atom.id;
-    atomEl.style.left = `${atom.x - 20}px`;
-    atomEl.style.top = `${atom.y - 20}px`;
+    atomEl.style.left = `${atom.x - 16}px`;
+    atomEl.style.top = `${atom.y - 16}px`;
     atomEl.style.backgroundColor = atom.color;
     atomEl.style.color = getBestTextColor(atom.color);
     atomEl.textContent = atom.element;
@@ -312,12 +322,6 @@ function createAtomElement(atom) {
     if (atom.ionic) {
         atomEl.classList.add('ionic');
     }
-    
-    // Add click handler to atom element
-    atomEl.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent canvas click
-        handleAtomClick(atom);
-    });
     
     canvas.appendChild(atomEl);
 }
@@ -708,7 +712,7 @@ function getAtomAtPosition(x, y) {
         const dx = x - atom.x;
         const dy = y - atom.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 20) { // Half of 40px atom size
+        if (distance < 16) { // Half of 32px atom size
             return atom;
         }
     }
