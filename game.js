@@ -140,8 +140,30 @@ function initCanvas() {
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
         
-        console.log('Canvas click at:', x, y);
+        console.log('========================================');
+        console.log('CANVAS CLICKED');
+        console.log('Event clientX:', event.clientX);
+        console.log('Event clientY:', event.clientY);
+        console.log('Canvas rect.left:', rect.left);
+        console.log('Canvas rect.top:', rect.top);
+        console.log('Calculated x:', x);
+        console.log('Calculated y:', y);
         console.log('Selected element:', gameState.selectedElement);
+        
+        // Add visual debug marker at exact click position
+        const marker = document.createElement('div');
+        marker.style.position = 'absolute';
+        marker.style.left = x + 'px';
+        marker.style.top = y + 'px';
+        marker.style.width = '4px';
+        marker.style.height = '4px';
+        marker.style.background = 'red';
+        marker.style.borderRadius = '50%';
+        marker.style.zIndex = '999';
+        marker.className = 'debug-marker';
+        canvas.appendChild(marker);
+        
+        console.log('Debug marker placed at:', x, y);
         
         // Check if we clicked on an atom
         let clickedOnAtom = false;
@@ -171,6 +193,8 @@ function initCanvas() {
             console.log('No element selected!');
             showNotification('Please select an element first', 'info');
         }
+        
+        console.log('========================================');
     });
     
     // Resize handler
@@ -349,8 +373,13 @@ function createAtomElement(atom) {
     const atomEl = document.createElement('div');
     atomEl.className = 'atom';
     atomEl.dataset.atomId = atom.id;
-    atomEl.style.left = `${atom.x - 16}px`;
-    atomEl.style.top = `${atom.y - 16}px`;
+    
+    // Calculate position - center the atom on the click point
+    const leftPos = atom.x - 16;  // 16 = half of 32px atom width
+    const topPos = atom.y - 16;   // 16 = half of 32px atom height
+    
+    atomEl.style.left = leftPos + 'px';
+    atomEl.style.top = topPos + 'px';
     atomEl.style.backgroundColor = atom.color;
     atomEl.style.color = getBestTextColor(atom.color);
     atomEl.textContent = atom.element;
@@ -359,12 +388,28 @@ function createAtomElement(atom) {
         atomEl.classList.add('ionic');
     }
     
-    console.log('Creating atom element:', atom.element, 'at', atom.x, atom.y);
-    console.log('Atom element:', atomEl);
+    console.log('=== CREATING ATOM ELEMENT ===');
+    console.log('Atom data:', atom);
+    console.log('Atom center position:', atom.x, atom.y);
+    console.log('Atom top-left corner:', leftPos, topPos);
+    console.log('Atom element style.left:', atomEl.style.left);
+    console.log('Atom element style.top:', atomEl.style.top);
     
     canvas.appendChild(atomEl);
     
-    console.log('Atom appended to canvas. Canvas children:', canvas.children.length);
+    console.log('Atom appended to canvas');
+    console.log('Canvas children count:', canvas.children.length);
+    
+    // Check actual position after append
+    setTimeout(() => {
+        const rect = atomEl.getBoundingClientRect();
+        const canvasRect = canvas.getBoundingClientRect();
+        console.log('Atom actual position relative to viewport:', rect.left, rect.top);
+        console.log('Canvas position relative to viewport:', canvasRect.left, canvasRect.top);
+        console.log('Atom position relative to canvas:', rect.left - canvasRect.left, rect.top - canvasRect.top);
+    }, 0);
+    
+    console.log('=== ATOM ELEMENT CREATED ===');
 }
 
 function handleAtomClick(atom) {
