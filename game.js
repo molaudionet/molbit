@@ -346,27 +346,34 @@ function createBond(atom1, atom2) {
     
     // Check if ionic bond is valid
     if (bondType === 'ionic') {
-        if (!atom1.ionic && !atom2.ionic) {
-            showNotification('Ionic bonds require at least one ionic element (Na, Cl, K, Ca)', 'error');
+        if (!ELEMENTS[atom1.element].ionic && !ELEMENTS[atom2.element].ionic) {
+            showNotification('Ionic bonds require ionic elements (Na, Cl, K, Ca)', 'error');
             audioSystem.playErrorSound();
             return;
         }
         
-        // Set charges for ionic bond
-        if (atom1.element === 'Na' || atom1.element === 'K') {
-            atom1.charge = '+';
-        } else if (atom1.element === 'Cl') {
-            atom1.charge = '-';
-        } else if (atom1.element === 'Ca') {
-            atom1.charge = '2+';
-        }
+        // Set charges for ionic bond - need one positive and one negative
+        const setCharge = (atom) => {
+            if (atom.element === 'Na' || atom.element === 'K') {
+                atom.charge = '+';
+            } else if (atom.element === 'Ca') {
+                atom.charge = '2+';
+            } else if (atom.element === 'Cl') {
+                atom.charge = '-';
+            }
+        };
         
-        if (atom2.element === 'Na' || atom2.element === 'K') {
-            atom2.charge = '+';
-        } else if (atom2.element === 'Cl') {
-            atom2.charge = '-';
-        } else if (atom2.element === 'Ca') {
-            atom2.charge = '2+';
+        setCharge(atom1);
+        setCharge(atom2);
+        
+        // Verify we have opposite charges
+        const atom1Positive = (atom1.charge === '+' || atom1.charge === '2+');
+        const atom2Positive = (atom2.charge === '+' || atom2.charge === '2+');
+        
+        if (atom1Positive === atom2Positive) {
+            showNotification('Ionic bonds need one positive and one negative ion!', 'error');
+            audioSystem.playErrorSound();
+            return;
         }
     }
     
@@ -381,18 +388,20 @@ function createBond(atom1, atom2) {
     // Create visual bond
     createBondElement(atom1, atom2, bondType);
     
-    // Update atom charges if ionic
+    // Update atom charges if ionic - DO THIS IMMEDIATELY
     if (bondType === 'ionic') {
         updateAtomCharges();
         audioSystem.playIonicBondSound(atom1.element, atom2.element);
+        showNotification(`Ionic bond created: ${atom1.element}${atom1.charge} ⚡ ${atom2.element}${atom2.charge}`, 'success');
     } else {
         audioSystem.playBondSound(atom1.element, atom2.element, bondType);
+        showNotification('Covalent bond created!', 'success');
     }
     
     createParticles(
         (atom1.x + atom2.x) / 2,
         (atom1.y + atom2.y) / 2,
-        '#4ecdc4'
+        bondType === 'ionic' ? '#ffe66d' : '#4ecdc4'
     );
     
     updateInfo();
@@ -458,19 +467,35 @@ function calculateCompleteness() {
     
     gameState.atoms.forEach(atom => {
         const bondCount = getBondCount(atom.id);
-        const valence = ELEMENTS[atom.element].valence;
+        const element = ELEMENTS[atom.element];
+        const valence = element.valence;
+        const isIonic = element.ionic;
         
         maxScore += 100;
         
-        if (bondCount === valence) {
-            // Perfect!
-            totalScore += 100;
-        } else if (bondCount < valence) {
-            // Incomplete
-            totalScore += (bondCount / valence) * 100;
-        } else {
-            // Over-bonded (penalty)
-            totalScore += Math.max(0, 100 - ((bondCount - valence) * 30));
+        // IONIC ELEMENTS: Just need 1 ionic bond to be complete
+        if (isIonic) {
+            const hasIonicBond = gameState.bonds.some(bond => 
+                (bond.atom1 === atom.id || bond.atom2 === atom.id) && bond.type === 'ionic'
+            );
+            
+            if (hasIonicBond) {
+                totalScore += 100; // Perfect!
+            } else if (bondCount > 0) {
+                totalScore += 50; // Has bonds but not ionic
+            } else {
+                totalScore += 0; // No bonds
+            }
+        }
+        // COVALENT ELEMENTS: Need correct number of bonds
+        else {
+            if (bondCount === valence) {
+                totalScore += 100; // Perfect!
+            } else if (bondCount < valence) {
+                totalScore += (bondCount / valence) * 100; // Incomplete
+            } else {
+                totalScore += Math.max(0, 100 - ((bondCount - valence) * 30)); // Over-bonded
+            }
         }
     });
     

@@ -486,15 +486,18 @@ body {
 
 .atom .charge {
     position: absolute;
-    top: -8px;
-    right: -8px;
+    top: -10px;
+    right: -10px;
     background: var(--accent);
     color: var(--bg-dark);
-    font-size: 12px;
+    font-size: 14px;
     font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    padding: 3px 8px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--bg-dark);
+    min-width: 24px;
+    text-align: center;
 }
 
 .bond-line {
@@ -507,7 +510,9 @@ body {
 
 .bond-line.ionic-bond {
     background: none;
-    border-top: 2px dashed var(--accent);
+    border-top: 3px dashed var(--accent);
+    height: 0 !important;
+    box-shadow: 0 0 10px rgba(255, 230, 109, 0.5);
 }
 
 .particle {
