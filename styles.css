@@ -1,0 +1,687 @@
+/* ========================================
+   MOLBIT STYLES - Modular CSS
+   ======================================== */
+
+/* CSS Variables */
+:root {
+    /* Colors */
+    --primary: #ff6b9d;
+    --secondary: #4ecdc4;
+    --accent: #ffe66d;
+    --success: #4ecdc4;
+    --warning: #ffe66d;
+    --danger: #ff6b6b;
+    --info: #a8dadc;
+    
+    /* Background */
+    --bg-dark: #0f0c29;
+    --bg-medium: #302b63;
+    --bg-light: #24243e;
+    
+    /* Text */
+    --text-primary: #ffffff;
+    --text-secondary: #b8c5d6;
+    
+    /* Spacing */
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 20px;
+    --spacing-lg: 30px;
+    --spacing-xl: 40px;
+    
+    /* Border Radius */
+    --radius-sm: 5px;
+    --radius-md: 10px;
+    --radius-lg: 15px;
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-medium) 50%, var(--bg-light) 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+/* Main Layout */
+#app {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    height: 100vh;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+}
+
+.panel {
+    background: rgba(36, 36, 62, 0.95);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    overflow-y: auto;
+    border: 2px solid rgba(255, 107, 157, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.panel-header {
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid rgba(255, 107, 157, 0.3);
+}
+
+.panel-header h2 {
+    color: var(--primary);
+    font-size: 1.5em;
+}
+
+/* ========================================
+   LEFT PANEL: Element Selection
+   ======================================== */
+
+#level-selector-container {
+    margin-bottom: var(--spacing-md);
+}
+
+#level-selector-container label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+#level-selector {
+    width: 100%;
+    padding: var(--spacing-sm);
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 107, 157, 0.3);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 1em;
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+#level-selector:hover {
+    border-color: var(--primary);
+    background: rgba(255, 107, 157, 0.1);
+}
+
+#level-selector option {
+    background: var(--bg-medium);
+    color: var(--text-primary);
+}
+
+/* Atom Palette */
+#atom-palette {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.atom-button {
+    padding: var(--spacing-md);
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.atom-button:hover {
+    background: rgba(255, 107, 157, 0.2);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+}
+
+.atom-button.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 20px var(--primary);
+}
+
+.atom-button .symbol {
+    font-size: 1.5em;
+}
+
+.atom-button .name {
+    font-size: 0.8em;
+    color: var(--text-secondary);
+}
+
+.atom-button.selected .name {
+    color: white;
+}
+
+/* Help Button */
+#help-button {
+    width: 100%;
+    margin-top: auto;
+}
+
+/* ========================================
+   CENTER PANEL: Canvas & Controls
+   ======================================== */
+
+#center-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+/* Level Info */
+#level-info {
+    text-align: center;
+    padding: var(--spacing-md);
+    background: rgba(255, 107, 157, 0.1);
+    border-radius: var(--radius-md);
+    border: 2px solid rgba(255, 107, 157, 0.3);
+}
+
+#level-title {
+    font-size: 2em;
+    color: var(--primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+#level-objective {
+    color: var(--text-secondary);
+    font-size: 1.1em;
+}
+
+/* Canvas */
+#canvas {
+    flex: 1;
+    background: radial-gradient(circle at center, rgba(78, 205, 196, 0.05), transparent);
+    border-radius: var(--radius-lg);
+    cursor: crosshair;
+    border: 3px solid rgba(78, 205, 196, 0.3);
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.3);
+}
+
+#canvas:hover {
+    border-color: var(--secondary);
+}
+
+/* Bond Selector */
+#bond-selector {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+}
+
+#bond-selector label {
+    color: var(--text-secondary);
+    font-weight: bold;
+}
+
+#bond-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex: 1;
+}
+
+.bond-button {
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+.bond-button:hover {
+    background: rgba(78, 205, 196, 0.2);
+    border-color: var(--secondary);
+}
+
+.bond-button.active {
+    background: var(--secondary);
+    border-color: var(--secondary);
+    box-shadow: 0 0 15px var(--secondary);
+}
+
+.bond-button.ionic {
+    background: rgba(255, 230, 109, 0.1);
+}
+
+.bond-button.ionic:hover,
+.bond-button.ionic.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg-dark);
+}
+
+/* Controls */
+#controls {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+/* Buttons */
+.btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    flex: 1;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #ff8fab);
+    color: white;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 5px 20px rgba(255, 107, 157, 0.5);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: var(--bg-dark);
+}
+
+.btn-info {
+    background: var(--info);
+    color: var(--bg-dark);
+}
+
+/* ========================================
+   RIGHT PANEL: Info & Feedback
+   ======================================== */
+
+#info-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+#info-panel > div {
+    background: rgba(255, 255, 255, 0.05);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+#info-panel h3 {
+    font-size: 1.1em;
+    color: var(--primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.info-description {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    margin-top: var(--spacing-xs);
+}
+
+/* Completeness Meter (was Stability) */
+.meter {
+    position: relative;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.meter-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--danger), var(--warning), var(--success));
+    transition: width var(--transition-slow);
+    border-radius: var(--radius-md);
+}
+
+.meter-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    font-size: 1.2em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Display Boxes */
+.display-box {
+    padding: var(--spacing-md);
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder {
+    color: var(--text-secondary);
+    font-weight: normal;
+    font-style: italic;
+}
+
+/* Notifications */
+#notifications {
+    min-height: 60px;
+}
+
+.notification {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-sm);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.notification.success {
+    background: rgba(78, 205, 196, 0.2);
+    border: 2px solid var(--success);
+    color: var(--success);
+}
+
+.notification.error {
+    background: rgba(255, 107, 107, 0.2);
+    border: 2px solid var(--danger);
+    color: var(--danger);
+}
+
+.notification.info {
+    background: rgba(168, 218, 220, 0.2);
+    border: 2px solid var(--info);
+    color: var(--info);
+}
+
+/* ========================================
+   CANVAS ELEMENTS (Dynamic)
+   ======================================== */
+
+.atom {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    transition: var(--transition-fast);
+    user-select: none;
+}
+
+.atom:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.atom.highlighted {
+    box-shadow: 0 0 25px currentColor;
+    animation: pulse 0.5s ease;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.atom.ionic {
+    border: 3px dashed var(--accent);
+}
+
+.atom .charge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--accent);
+    color: var(--bg-dark);
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.bond-line {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.7);
+    transform-origin: left center;
+    pointer-events: none;
+    transition: var(--transition-fast);
+}
+
+.bond-line.ionic-bond {
+    background: none;
+    border-top: 2px dashed var(--accent);
+}
+
+.particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--secondary);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particle-burst 0.6s ease-out forwards;
+}
+
+@keyframes particle-burst {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(0);
+    }
+}
+
+/* ========================================
+   MODAL
+   ======================================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: var(--bg-medium);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 3px solid var(--primary);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid rgba(255, 107, 157, 0.3);
+}
+
+.modal-header h2 {
+    color: var(--primary);
+    font-size: 2em;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 2.5em;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition-normal);
+}
+
+.close-btn:hover {
+    background: rgba(255, 107, 157, 0.2);
+    transform: rotate(90deg);
+}
+
+.modal-body section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.modal-body h3 {
+    color: var(--secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.modal-body p,
+.modal-body li {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-sm);
+}
+
+.modal-body ol,
+.modal-body ul {
+    margin-left: var(--spacing-lg);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1200px) {
+    #app {
+        grid-template-columns: 250px 1fr 280px;
+    }
+}
+
+@media (max-width: 900px) {
+    #app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    .panel {
+        overflow-y: visible;
+    }
+    
+    #left-panel {
+        order: 1;
+    }
+    
+    #center-panel {
+        order: 2;
+        min-height: 500px;
+    }
+    
+    #right-panel {
+        order: 3;
+    }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+.hidden {
+    display: none !important;
+}
+
+.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
