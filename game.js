@@ -101,27 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('MOLBIT STARTING UP');
     console.log('========================================');
     
-    alert('MolBit JavaScript loaded! Check console (F12) for debug info.');
-    
-    console.log('Step 1: Init canvas...');
     initCanvas();
-    
-    console.log('Step 2: Init level selector...');
     initLevelSelector();
-    
-    console.log('Step 3: Init atom palette...');
     initAtomPalette();
-    
-    console.log('Step 4: Init bond selector...');
     initBondSelector();
-    
-    console.log('Step 5: Init controls...');
     initControls();
-    
-    console.log('Step 6: Init help...');
     initHelp();
-    
-    console.log('Step 7: Load level 0...');
     loadLevel(0);
     
     console.log('========================================');
@@ -133,12 +118,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function initCanvas() {
     const canvas = document.getElementById('canvas');
     
+    // Canvas has 3px border that needs to be accounted for
+    const BORDER_WIDTH = 3;
+    
     // Direct click handler on canvas element
     canvas.addEventListener('click', (event) => {
-        // Only process if we clicked the canvas itself or inside it
         const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+        
+        // Subtract border width to get true position inside canvas
+        const x = event.clientX - rect.left - BORDER_WIDTH;
+        const y = event.clientY - rect.top - BORDER_WIDTH;
         
         console.log('========================================');
         console.log('CANVAS CLICKED');
@@ -146,24 +135,10 @@ function initCanvas() {
         console.log('Event clientY:', event.clientY);
         console.log('Canvas rect.left:', rect.left);
         console.log('Canvas rect.top:', rect.top);
-        console.log('Calculated x:', x);
-        console.log('Calculated y:', y);
+        console.log('Border width:', BORDER_WIDTH);
+        console.log('Calculated x (after border adjustment):', x);
+        console.log('Calculated y (after border adjustment):', y);
         console.log('Selected element:', gameState.selectedElement);
-        
-        // Add visual debug marker at exact click position
-        const marker = document.createElement('div');
-        marker.style.position = 'absolute';
-        marker.style.left = x + 'px';
-        marker.style.top = y + 'px';
-        marker.style.width = '4px';
-        marker.style.height = '4px';
-        marker.style.background = 'red';
-        marker.style.borderRadius = '50%';
-        marker.style.zIndex = '999';
-        marker.className = 'debug-marker';
-        canvas.appendChild(marker);
-        
-        console.log('Debug marker placed at:', x, y);
         
         // Check if we clicked on an atom
         let clickedOnAtom = false;
@@ -334,11 +309,6 @@ function placeAtom(x, y) {
     const element = gameState.selectedElement;
     const data = ELEMENTS[element];
     
-    console.log('=== PLACING ATOM ===');
-    console.log('Element:', element);
-    console.log('Position:', x, y);
-    console.log('Data:', data);
-    
     const atom = {
         id: gameState.nextAtomId++,
         element: element,
@@ -351,12 +321,6 @@ function placeAtom(x, y) {
     };
     
     gameState.atoms.push(atom);
-    console.log('Atom added to array. Total atoms:', gameState.atoms.length);
-    
-    // Alert on first atom
-    if (gameState.atoms.length === 1) {
-        alert('First atom created! You should see it on canvas. If not, check browser console.');
-    }
     
     // Create visual element
     createAtomElement(atom);
@@ -365,7 +329,6 @@ function placeAtom(x, y) {
     createParticles(x, y, data.color);
     
     updateInfo();
-    console.log('=== ATOM PLACEMENT COMPLETE ===');
 }
 
 function createAtomElement(atom) {
@@ -388,28 +351,7 @@ function createAtomElement(atom) {
         atomEl.classList.add('ionic');
     }
     
-    console.log('=== CREATING ATOM ELEMENT ===');
-    console.log('Atom data:', atom);
-    console.log('Atom center position:', atom.x, atom.y);
-    console.log('Atom top-left corner:', leftPos, topPos);
-    console.log('Atom element style.left:', atomEl.style.left);
-    console.log('Atom element style.top:', atomEl.style.top);
-    
     canvas.appendChild(atomEl);
-    
-    console.log('Atom appended to canvas');
-    console.log('Canvas children count:', canvas.children.length);
-    
-    // Check actual position after append
-    setTimeout(() => {
-        const rect = atomEl.getBoundingClientRect();
-        const canvasRect = canvas.getBoundingClientRect();
-        console.log('Atom actual position relative to viewport:', rect.left, rect.top);
-        console.log('Canvas position relative to viewport:', canvasRect.left, canvasRect.top);
-        console.log('Atom position relative to canvas:', rect.left - canvasRect.left, rect.top - canvasRect.top);
-    }, 0);
-    
-    console.log('=== ATOM ELEMENT CREATED ===');
 }
 
 function handleAtomClick(atom) {
